@@ -11,7 +11,8 @@ st.set_page_config(page_title="Chicago Crime Dashboard", layout="wide")
 # ==============================
 # Theme: Light Blue + White (High Contrast)
 # ==============================
-st.markdown("""
+st.markdown(
+  """
 <style>
 .stApp { background: #f4f9ff; color: #0f172a; }
 html, body, [class*="css"] { color: #0f172a !important; }
@@ -104,7 +105,6 @@ div[role="option"] {
 </style>
 """, unsafe_allow_html=True)
 
-)
 
 # ==============================
 # UI Helper: Insight Card
@@ -910,3 +910,4 @@ with tab6:
   เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
 """
     )
+
