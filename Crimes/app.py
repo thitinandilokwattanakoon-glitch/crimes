@@ -102,6 +102,43 @@ div[role="listbox"] {
 div[role="option"] {
   color: #0f172a !important;
 }
+/* =========================
+   BaseWeb dropdown list: force readable text
+   ========================= */
+
+/* กล่องรายการ dropdown */
+div[role="listbox"] {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.25) !important;
+}
+
+/* แต่ละ option */
+div[role="option"] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* ตัวอักษรใน option (BaseWeb มักซ่อนใน span) */
+div[role="option"] * {
+  color: #0f172a !important;
+}
+
+/* option ที่ hover */
+div[role="option"]:hover {
+  background: #e6f2ff !important;
+}
+
+/* option ที่ถูกเลือก/ถูก highlight */
+div[role="option"][aria-selected="true"],
+div[role="option"][data-highlighted="true"] {
+  background: #dbeafe !important;
+}
+
+/* บางธีมของ Streamlit/BaseWeb ใช้ class นี้กับรายการ */
+ul[role="listbox"] {
+  background: #ffffff !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -910,4 +947,5 @@ with tab6:
   เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
 """
     )
+
 
