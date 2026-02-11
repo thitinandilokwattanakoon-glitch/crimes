@@ -60,83 +60,45 @@ hr { border-color: rgba(15, 23, 42, 0.18) !important; }
 }
 
 /* =========================
-   Sidebar Widgets Fix (Text Visible)
+   FIX: Selectbox / Multiselect visibility
    ========================= */
 
-/* Button in Sidebar */
-section[data-testid="stSidebar"] div.stButton > button {
-  background: #0b3d91 !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.25) !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-}
-section[data-testid="stSidebar"] div.stButton > button:hover {
-  filter: brightness(0.95) !important;
-}
-
-/* Select / MultiSelect */
+/* 1) กล่อง select หลัก (ก่อนกด) */
 section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
   background: #ffffff !important;
   color: #0f172a !important;
-  border: 1px solid rgba(15, 23, 42, 0.25) !important;
-  border-radius: 12px !important;
+  border: 1px solid rgba(15, 23, 42, 0.3) !important;
 }
 
-/* text + placeholder */
-section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+/* 2) ข้อความ Choose options / placeholder */
+section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+  color: #0f172a !important;
+}
+
+/* 3) ช่อง input ภายใน select */
 section[data-testid="stSidebar"] div[data-baseweb="select"] input {
   color: #0f172a !important;
-}
-
-/* dropdown arrow */
-section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
-  fill: #0f172a !important;
-}
-
-/* dropdown menu */
-div[role="listbox"] {
   background: #ffffff !important;
-  color: #0f172a !important;
 }
-div[role="option"] {
-  color: #0f172a !important;
-}
-/* =========================
-   BaseWeb dropdown list: force readable text
-   ========================= */
 
-/* กล่องรายการ dropdown */
-div[role="listbox"] {
+/* 4) กล่อง dropdown ที่เด้งออกมา */
+[data-baseweb="popover"] {
   background: #ffffff !important;
-  border: 1px solid rgba(15, 23, 42, 0.25) !important;
 }
 
-/* แต่ละ option */
-div[role="option"] {
+/* 5) รายการใน dropdown */
+[data-baseweb="menu"] {
   background: #ffffff !important;
+}
+
+/* 6) แต่ละ option */
+[data-baseweb="menu"] div {
   color: #0f172a !important;
 }
 
-/* ตัวอักษรใน option (BaseWeb มักซ่อนใน span) */
-div[role="option"] * {
-  color: #0f172a !important;
-}
-
-/* option ที่ hover */
-div[role="option"]:hover {
+/* 7) ตอน hover */
+[data-baseweb="menu"] div:hover {
   background: #e6f2ff !important;
-}
-
-/* option ที่ถูกเลือก/ถูก highlight */
-div[role="option"][aria-selected="true"],
-div[role="option"][data-highlighted="true"] {
-  background: #dbeafe !important;
-}
-
-/* บางธีมของ Streamlit/BaseWeb ใช้ class นี้กับรายการ */
-ul[role="listbox"] {
-  background: #ffffff !important;
 }
 
 </style>
@@ -947,5 +909,6 @@ with tab6:
   เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
 """
     )
+
 
 
