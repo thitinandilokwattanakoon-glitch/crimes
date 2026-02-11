@@ -14,6 +14,20 @@ st.set_page_config(page_title="Chicago Crime Dashboard", layout="wide")
 st.markdown(
   """
 <style>
+/* Force Light Mode */
+html, body {
+  background-color: #f4f9ff !important;
+  color: #0f172a !important;
+}
+
+/* ปิด dark color scheme */
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background-color: #f4f9ff !important;
+    color: #0f172a !important;
+  }
+}
+
 .stApp { background: #f4f9ff; color: #0f172a; }
 html, body, [class*="css"] { color: #0f172a !important; }
 
@@ -909,6 +923,7 @@ with tab6:
   เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
 """
     )
+
 
 
 
