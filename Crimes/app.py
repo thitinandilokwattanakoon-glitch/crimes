@@ -130,12 +130,137 @@ if a.empty or b.empty:
 # ==============================
 # Tabs: Overview -> Quality -> Exploration -> Cleaning Process
 # ==============================
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "ภาพรวม (Overview)",
     "คุณภาพข้อมูล (Data Quality)",
     "สำรวจข้อมูล (Exploration)",
-    "ขั้นตอนการจัดการข้อมูล (Cleaning Process)"
+    "ขั้นตอนการจัดการข้อมูล (Cleaning Process)",
+    "พจนานุกรมข้อมูล (Data Dictionary)",
+    "Missing ก่อน–หลัง (Missing Compare)"
 ])
+# ==============================
+# Data Dictionary + Missing Handling (จากไฟล์ 1 (1).docx)
+# ==============================
+
+FEATURE_INFO = [
+    # Event Identification
+    ("Case Number", "รหัสคดีเฉพาะ (Case identifier)", "หมวดหมู่ (Categorical/String)", "Event"),
+    ("ID", "หมายเลขประจำเหตุการณ์ (Record ID)", "ตัวเลข (Numeric/Integer)", "Event"),
+    ("Date", "วันเวลาเกิดเหตุ (Incident datetime)", "วันเวลา (Datetime)", "Event"),
+    ("Updated On", "วันเวลาอัปเดตข้อมูล (Updated datetime)", "วันเวลา (Datetime)", "Event"),
+    ("Year", "ปีที่เกิดเหตุ (Year)", "ตัวเลข (Numeric/Integer)", "Event"),
+
+    # Crime Classification
+    ("IUCR", "รหัสประเภทคดีมาตรฐาน (IUCR code)", "หมวดหมู่ (Categorical)", "Crime"),
+    ("Primary Type", "ประเภทคดีหลัก (Primary type)", "หมวดหมู่ (Categorical)", "Crime"),
+    ("Description", "รายละเอียดคดี (Description)", "หมวดหมู่ (Categorical)", "Crime"),
+    ("FBI Code", "รหัสจัดกลุ่มตาม FBI (FBI code)", "หมวดหมู่ (Categorical)", "Crime"),
+
+    # Case Status
+    ("Arrest", "มีการจับกุมหรือไม่ (Arrested)", "ตรรกะ (Boolean)", "Status"),
+    ("Domestic", "คดีในครอบครัวหรือไม่ (Domestic)", "ตรรกะ (Boolean)", "Status"),
+
+    # Location & Geography
+    ("Block", "บล็อกที่เกิดเหตุ (Block)", "หมวดหมู่ (Categorical)", "Location"),
+    ("Beat", "รหัสเขตย่อยตำรวจ (Beat)", "ตัวเลข (Numeric/Integer)", "Location"),
+    ("District", "เขตตำรวจ (District)", "ตัวเลข (Numeric/Integer)", "Location"),
+    ("Ward", "เขตการเลือกตั้ง (Ward)", "ตัวเลข (Numeric)", "Location"),
+    ("Community Area", "เขตชุมชน (Community area)", "ตัวเลข (Numeric)", "Location"),
+    ("Location Description", "ประเภทสถานที่ (Location description)", "หมวดหมู่ (Categorical)", "Location"),
+    ("X Coordinate", "พิกัดแกน X (X coordinate)", "ตัวเลข (Numeric)", "Geo"),
+    ("Y Coordinate", "พิกัดแกน Y (Y coordinate)", "ตัวเลข (Numeric)", "Geo"),
+    ("Latitude", "ละติจูด (Latitude)", "ตัวเลขทศนิยม (Numeric/Float)", "Geo"),
+    ("Longitude", "ลองจิจูด (Longitude)", "ตัวเลขทศนิยม (Numeric/Float)", "Geo"),
+    ("Location", "พิกัดคู่ (Lat, Long) (Location tuple text)", "ข้อความ/ออบเจกต์ (Object/String)", "Geo"),
+]
+
+# วิธีจัดการ missing ตามเอกสาร
+MISSING_HANDLING = {
+    # Drop rows (ฟีเจอร์แกนหลัก)
+    "Case Number": "ลบแถว (Drop rows) – ฟีเจอร์หลักของเหตุการณ์",
+    "Date": "ลบแถว (Drop rows) – ใช้วิเคราะห์เวลา/แนวโน้ม",
+    "Block": "ลบแถว (Drop rows) – ระบุตำแหน่งเหตุ",
+    "IUCR": "ลบแถว (Drop rows) – รหัสมาตรฐานประเภทคดี",
+    "Primary Type": "ลบแถว (Drop rows) – ใช้วิเคราะห์ประเภทคดี",
+    "Description": "ลบแถว (Drop rows) – รายละเอียดสำคัญ",
+    "Arrest": "ลบแถว (Drop rows) – ใช้คำนวณสัดส่วนจับกุม",
+    "Domestic": "ลบแถว (Drop rows) – ใช้แยก domestic/non-domestic",
+    "Beat": "ลบแถว (Drop rows) – รหัสพื้นที่",
+    "District": "ลบแถว (Drop rows) – รหัสพื้นที่",
+    "FBI Code": "ลบแถว (Drop rows) – รหัสจัดกลุ่ม",
+    "Year": "ลบแถว (Drop rows) – เงื่อนไขตามช่วงปี",
+    "Updated On": "ลบแถว (Drop rows) – ความสมบูรณ์ของข้อมูล",
+
+    # Fill
+    "Location Description": "เติมค่า (Fill) = UNKNOWN – missing ต่ำ (~0.41%)",
+
+    # Drop columns
+    "Ward": "ตัดคอลัมน์ (Drop column) – missing สูงมาก (~69%)",
+    "Community Area": "ตัดคอลัมน์ (Drop column) – missing สูงมาก (~68%)",
+
+    # Map-only filtering
+    "Latitude": "กรองเฉพาะตอนทำแผนที่ (Map-only filter) – ไม่ลบจากชุดหลัก",
+    "Longitude": "กรองเฉพาะตอนทำแผนที่ (Map-only filter) – ไม่ลบจากชุดหลัก",
+    "X Coordinate": "กรองเฉพาะตอนทำแผนที่ (Map-only filter) – ไม่ลบจากชุดหลัก",
+    "Y Coordinate": "กรองเฉพาะตอนทำแผนที่ (Map-only filter) – ไม่ลบจากชุดหลัก",
+    "Location": "กรองเฉพาะตอนทำแผนที่ (Map-only filter) – ไม่ลบจากชุดหลัก",
+}
+
+def dtype_str(s: pd.Series) -> str:
+    try:
+        return str(s.dtype)
+    except Exception:
+        return "unknown"
+
+def missing_count_pct(df: pd.DataFrame, col: str):
+    if col not in df.columns:
+        return None, None
+    cnt = int(df[col].isna().sum())
+    pct = float(df[col].isna().mean() * 100)
+    return cnt, pct
+
+def build_data_dictionary(df_b: pd.DataFrame, df_a: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for col, meaning, expected_type, group in FEATURE_INFO:
+        b_dtype = dtype_str(df_b[col]) if col in df_b.columns else "-"
+        a_dtype = dtype_str(df_a[col]) if col in df_a.columns else "-"
+        handling = MISSING_HANDLING.get(col, "ไม่ระบุ (Not specified)")
+        rows.append({
+            "ฟีเจอร์ (Feature)": col,
+            "กลุ่ม (Group)": group,
+            "ความหมาย (Meaning)": meaning,
+            "ชนิดข้อมูลที่ควรเป็น (Expected type)": expected_type,
+            "ชนิดข้อมูลก่อน (Before dtype)": b_dtype,
+            "ชนิดข้อมูลหลัง (After dtype)": a_dtype,
+            "แนวทางจัดการ Missing (Handling)": handling
+        })
+    return pd.DataFrame(rows)
+
+def build_missing_compare(df_b: pd.DataFrame, df_a: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    all_cols = sorted(set(df_b.columns).union(set(df_a.columns)))
+    for col in all_cols:
+        b_cnt, b_pct = missing_count_pct(df_b, col)
+        a_cnt, a_pct = missing_count_pct(df_a, col)
+
+        rows.append({
+            "ฟีเจอร์ (Feature)": col,
+            "Missing ก่อน (Count)": "-" if b_cnt is None else f"{b_cnt:,}",
+            "Missing ก่อน (%)": "-" if b_pct is None else f"{b_pct:.4f}",
+            "Missing หลัง (Count)": "-" if a_cnt is None else f"{a_cnt:,}",
+            "Missing หลัง (%)": "-" if a_pct is None else f"{a_pct:.4f}",
+            "วิธีจัดการ (Method)": MISSING_HANDLING.get(col, "-")
+        })
+    df_out = pd.DataFrame(rows)
+    # เรียงให้เห็นคอลัมน์ที่ missing สูงก่อน (ใช้ after ก่อน ถ้ามี)
+    def sort_key(x):
+        try:
+            return float(x)
+        except:
+            return -1.0
+    df_out["_sort"] = df_out["Missing หลัง (%)"].apply(sort_key)
+    df_out = df_out.sort_values("_sort", ascending=False).drop(columns=["_sort"])
+    return df_out
 
 # ------------------------------
 # TAB 1: Overview
@@ -489,3 +614,53 @@ Latitude/Longitude/Location หาก missing ให้กรองเฉพา�
         "สะท้อนปัจจัยภายนอก เช่น เศรษฐกิจ/สังคม",
         "ใช้เทรนด์ (Trend) เพื่อวางแผนกำลังคนและมาตรการเชิงป้องกันล่วงหน้า"
     )
+# ------------------------------
+# TAB 5: Data Dictionary
+# ------------------------------
+with tab5:
+    st.header("พจนานุกรมข้อมูล (Data Dictionary)")
+    st.caption("อธิบายว่าฟีเจอร์เก็บข้อมูลอะไร และชนิดข้อมูล (Data type) ก่อน–หลัง")
+
+    dd = build_data_dictionary(df_before, df_after)
+    st.dataframe(dd, use_container_width=True, height=520)
+
+    st.divider()
+    st.subheader("สรุปขนาดข้อมูล (Dataset Size Summary)")
+    colS1, colS2, colS3, colS4 = st.columns(4)
+    colS1.metric("ก่อน: แถว (Rows)", f"{df_before.shape[0]:,}")
+    colS2.metric("ก่อน: ฟีเจอร์ (Columns)", f"{df_before.shape[1]:,}")
+    colS3.metric("หลัง: แถว (Rows)", f"{df_after.shape[0]:,}")
+    colS4.metric("หลัง: ฟีเจอร์ (Columns)", f"{df_after.shape[1]:,}")
+
+    st.info(
+        f"หลังจัดการ Missing แล้ว จำนวนข้อมูลเปลี่ยนจาก **{df_before.shape[0]:,} แถว** → "
+        f"**{df_after.shape[0]:,} แถว** (ลดลง **{df_before.shape[0]-df_after.shape[0]:,} แถว**) "
+        f"และจำนวนฟีเจอร์จาก **{df_before.shape[1]}** → **{df_after.shape[1]}**"
+    )
+# ------------------------------
+# TAB 6: Missing Compare
+# ------------------------------
+with tab6:
+    st.header("เปรียบเทียบ Missing ก่อน–หลัง (Missing Comparison)")
+    st.caption("แสดงจำนวน (Count) และร้อยละ (%) ของ Missing ก่อนจัดการ vs หลังจัดการ")
+
+    miss_cmp = build_missing_compare(df_before, df_after)
+    st.dataframe(miss_cmp, use_container_width=True, height=520)
+
+    st.divider()
+    st.subheader("สรุปวิธีจัดการ Missing (Methods Summary)")
+
+    st.markdown("""
+- **ลบแถว (Drop rows):** ใช้กับฟีเจอร์แกนหลัก เช่น Case Number, Date, IUCR, Primary Type, Arrest, District ฯลฯ  
+  เหตุผล: ถ้าหายจะวิเคราะห์ประเภทคดี/เวลา/สัดส่วนจับกุมไม่ถูกต้อง
+
+- **เติมค่า (Fill):** Location Description เติม **UNKNOWN**  
+  เหตุผล: missing ต่ำ (~0.41%) และเป็นข้อมูลหมวดหมู่
+
+- **ตัดคอลัมน์ (Drop column):** Ward และ Community Area  
+  เหตุผล: missing สูงมาก (~69% และ ~68%) เสี่ยง bias
+
+- **กรองเฉพาะตอนทำแผนที่ (Map-only filtering):** Latitude/Longitude/Location/X/Y  
+  เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
+""")
+
