@@ -11,11 +11,11 @@ st.set_page_config(page_title="Chicago Crime Dashboard", layout="wide")
 # ==============================
 # Theme: Light Blue + White (High Contrast)
 # ==============================
-st.markdown(
-    """
+st.markdown("""
 <style>
 .stApp { background: #f4f9ff; color: #0f172a; }
 html, body, [class*="css"] { color: #0f172a !important; }
+
 h1, h2, h3, h4 { color: #0b3d91 !important; }
 p, span, label, small, div { color: #0f172a !important; }
 
@@ -57,9 +57,53 @@ hr { border-color: rgba(15, 23, 42, 0.18) !important; }
 .insight-b{
   font-weight:700;
 }
+
+/* =========================
+   Sidebar Widgets Fix (Text Visible)
+   ========================= */
+
+/* Button in Sidebar */
+section[data-testid="stSidebar"] div.stButton > button {
+  background: #0b3d91 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+}
+section[data-testid="stSidebar"] div.stButton > button:hover {
+  filter: brightness(0.95) !important;
+}
+
+/* Select / MultiSelect */
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.25) !important;
+  border-radius: 12px !important;
+}
+
+/* text + placeholder */
+section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+section[data-testid="stSidebar"] div[data-baseweb="select"] input {
+  color: #0f172a !important;
+}
+
+/* dropdown arrow */
+section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+  fill: #0f172a !important;
+}
+
+/* dropdown menu */
+div[role="listbox"] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+div[role="option"] {
+  color: #0f172a !important;
+}
 </style>
-""",
-    unsafe_allow_html=True,
+""", unsafe_allow_html=True)
+
 )
 
 # ==============================
@@ -108,50 +152,6 @@ with st.spinner("กำลังโหลดข้อมูล..."):
 # ==============================
 st.title("Chicago Crimes Dashboard")
 st.caption("เปรียบเทียบข้อมูลก่อนทำความสะอาด (Before) และหลังทำความสะอาด (After)")
-
-/* =========================
-   Sidebar Widgets Fix (Text Visible)
-   ========================= */
-
-/* 1) ปุ่มใน Sidebar: ทำให้ตัวหนังสือเป็นสีขาว + พื้นหลังน้ำเงิน */
-section[data-testid="stSidebar"] div.stButton > button {
-  background: #0b3d91 !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.25) !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-}
-section[data-testid="stSidebar"] div.stButton > button:hover {
-  filter: brightness(0.95) !important;
-}
-
-/* 2) Selectbox / Multiselect / Input ใน Sidebar: ทำให้กล่องเป็นสีขาว ตัวหนังสือสีเข้ม */
-section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(15, 23, 42, 0.25) !important;
-  border-radius: 12px !important;
-}
-
-/* ตัวอักษรที่แสดงใน select (ทั้งค่าและ placeholder) */
-section[data-testid="stSidebar"] div[data-baseweb="select"] span,
-section[data-testid="stSidebar"] div[data-baseweb="select"] input {
-  color: #0f172a !important;
-}
-
-/* ลูกศร dropdown */
-section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
-  fill: #0f172a !important;
-}
-
-/* 3) กล่องรายการที่เด้งลงมา (dropdown menu) */
-div[role="listbox"] {
-  background: #ffffff !important;
-  color: #0f172a !important;
-}
-div[role="option"] {
-  color: #0f172a !important;
-}
 
 # ==============================
 # Sidebar Filters (Competition-ready)
@@ -910,4 +910,3 @@ with tab6:
   เหตุผล: ไม่กระทบการวิเคราะห์ภาพรวม แต่ทำให้แผนที่แม่นยำ
 """
     )
-
